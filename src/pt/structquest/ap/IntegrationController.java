@@ -12,6 +12,7 @@ import java.util.Map;
 /**
  * Controlador de Integração: único ponto de entrada das chamadas da Inven!RA.
  *
+ *   GET        /               mensagem de atividade ativa (health check)
  *   GET        /params          json_params_url        (E2)
  *   GET|POST   /deploy          deploy_url             (E3)
  *   GET        /analytics-list  analytics_list_url     (E5)
@@ -31,6 +32,7 @@ public class IntegrationController {
     }
 
     public void register(HttpServer server) {
+        server.createContext("/", this::handleRoot);
         server.createContext("/params", this::handleParams);
         server.createContext("/deploy", this::handleDeploy);
         server.createContext("/analytics-list", this::handleAnalyticsList);
