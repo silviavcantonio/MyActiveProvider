@@ -39,6 +39,38 @@ public class IntegrationController {
         server.createContext("/analytics", this::handleAnalytics);
     }
 
+    // ------------------------------------------------------------ mensagem inicial
+
+    /**
+     * GET /  devolve a mensagem inicial a indicar que o Activity Provider está ativo.
+     * Serve também de verificação rápida (health check). Qualquer outro caminho
+     * que não corresponda a um endpoint devolve 404.
+     */
+    private void handleRoot(HttpExchange ex) throws IOException {
+        String path = ex.getRequestURI().getPath();
+        if (!"/".equals(path) && !path.isEmpty()) {
+            HttpUtil.sendError(ex, 404, "Caminho desconhecido: " + path);
+            return;
+        }
+        if (!"GET".equals(ex.getRequestMethod())) {
+            HttpUtil.sendError(ex, 405, "Método não permitido");
+            return;
+        }
+        String base = HttpUtil.baseUrl(ex);
+        Map<String, Object> endpoints = new LinkedHashMap<>();
+        endpoints.put("config_url", base + "/config");
+        endpoints.put("json_params_url", base + "/params");
+        endpoints.put("deploy_url", base + "/deploy");
+        endpoints.put("analytics_list_url", base + "/analytics-list");
+        endpoints.put("analytics_url", base + "/analytics");
+
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("status", "ativo");
+        out.put("mensagem", "StructQuest Activity Provider ativo");
+        out.put("endpoints", endpoints);
+        HttpUtil.sendJson(ex, 200, out);
+    }
+    
     // ------------------------------------------------------------------ E2
 
     private void handleParams(HttpExchange ex) throws IOException {
